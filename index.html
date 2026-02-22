@@ -48,6 +48,7 @@ button { font-weight: bold; cursor: pointer; }
   <option value="sunday">Sunday / Holiday</option>
 </select>
 
+
 <label>Customer</label>
 <input id="customerName" placeholder="Customer name (e.g., ABC Manufacturing)" />
 <label>Customer Address</label>
@@ -79,7 +80,7 @@ button { font-weight: bold; cursor: pointer; }
 
 <div style="margin-top:12px;">
 <button onclick="calculate()">Calculate Quote</button>
-<button onclick="copyQuote()">Copy</button>
+<button type="button" onclick="copyQuote()">Copy</button>
 <button onclick="window.print()">Print / Save as PDF</button>
 </div>
 </div>
@@ -151,9 +152,42 @@ text += `\nDisclaimer: All times are estimates until service is complete. Final 
   lastText = text;
 }
 
+<script>
 function copyQuote() {
   if (!lastText) return;
-  navigator.clipboard.writeText(lastText);
+
+  // Modern clipboard (works on many browsers)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(lastText).catch(() => fallbackCopy(lastText));
+  } else {
+    fallbackCopy(lastText);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+
+  // Keep it off-screen but selectable
+  ta.style.position = "fixed";
+  ta.style.top = "-1000px";
+  ta.style.left = "-1000px";
+  ta.setAttribute("readonly", "");
+
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+
+  try {
+    document.execCommand("copy");
+  } catch (e) {
+    // If copy fails, at least show the text so they can manually copy
+    alert("Copy failed. Please press and hold to select text in the quote box.");
+  }
+
+  document.body.removeChild(ta);
+}
+</script>
 }
 </script>
 
