@@ -60,8 +60,9 @@ button { font-weight: bold; cursor: pointer; }
   </div>
 
   <div>
-    <label>Round-Trip Drive Time (minutes)</label>
-    <input id="driveMins" type="number" step="5" placeholder="Enter round-trip drive time in minutes (e.g. 40)" />
+    <label>One-Way Drive Time (minutes)</label>
+<input id="driveMins" type="number" step="5" placeholder="Enter one-way drive time in minutes (e.g. 20)" />
+<div class="muted">App will calculate round-trip (×2)</div>
     <div class="muted">This will be replaced by Google Maps</div>
   </div>
 </div>
@@ -102,7 +103,8 @@ let lastText = "";
 function calculate() {
   const type = callType.value;
   const work = Number(workMins.value);
-  const drive = Number(driveMins.value);
+  const oneWayDrive = Number(driveMins.value);
+const drive = oneWayDrive * 2; // round-trip minutes
   const customer = document.getElementById("customerName").value.trim();
   const address = CustomerAddress.value.trim();
 
