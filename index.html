@@ -151,7 +151,7 @@ text += `\nDisclaimer: All times are estimates until service is complete. Final 
   lastText = text;
 }
 
-<script>
+
 function copyQuote() {
   if (!lastText) return;
 
@@ -184,9 +184,7 @@ function fallbackCopy(text) {
     alert("Copy failed. Please press and hold to select text in the quote box.");
   }
 
-  document.body.removeChild(ta);
-}
-</script>
+   document.body.removeChild(ta);
 }
 </script>
 
