@@ -48,8 +48,10 @@ button { font-weight: bold; cursor: pointer; }
   <option value="sunday">Sunday / Holiday</option>
 </select>
 
+<label>Customer</label>
+<input id="customerName" placeholder="Customer name (e.g., ABC Manufacturing)" />
 <label>Job Address (demo)</label>
-<input id="jobAddress" placeholder="123 Main St, Lansing, MI" />
+<input id="CustomerAddress" placeholder="123 Main St, Lansing, MI" />
 
 <div class="row">
 <div>
@@ -101,8 +103,11 @@ function calculate() {
   const type = callType.value;
   const work = Number(workMins.value);
   const drive = Number(driveMins.value);
-  const address = jobAddress.value.trim();
- let text = `Customer Address: ${address || "N/A"}\n\n`;
+  const customer = document.getElementById("customerName").value.trim();
+  const address = CustomerAddress.value.trim();
+
+ let text = `Customer: ${customer || "N/A"}\n`;
+text += `Customer Address: ${address || "N/A"}\n\n`;
 text += `Call Type: ${type.toUpperCase()}\n\n`;
   let total = 0;
 
