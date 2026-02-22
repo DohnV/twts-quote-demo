@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TWTS Service Quote </title>
+
+<style>* {
+  box-sizing: border-box;
+}
+body { font-family: Arial, sans-serif; margin: 16px; max-width: 720px; }
+.card { border: 1px solid #1CA7EC; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }textarea {
+  resize: none;
+}
+.row > div { flex: 1; min-width: 220px; }
+label { font-size: 12px; margin-top: 10px; display: block; }
+input, select, button, textarea {
+  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;
+}
+button { font-weight: bold; cursor: pointer; }
+.breakdown { background: #f7f7f7; padding: 10px; border-radius: 10px; white-space: pre-wrap; }
+.total { font-size: 22px; font-weight: bold; }
+.muted { color: #666; font-size: 12px; }
+@media print {
+  .noPrint { display: none; }
+  body { margin: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<div style="display:flex;align-items:center;gap:15px;">
+  <img src="twts-logo.png" alt="Total Water Logo" style="height:100px;">
+  <h2 style="margin:0;">Service Quote Calculator (Demo)</h2>
+</div>
+<div class="muted">Shop: 2820 Alpha Access St, Lansing, MI 48910</div>
+<div class="muted">⚠ Demo Mode — Drive time is simulated</div>
+</div>
+
+<div class="card noPrint">
+<label>Call Type</label>
+<select id="callType">
+  <option value="standard">Standard</option>
+  <option value="emergency">Emergency</option>
+  <option value="sunday">Sunday / Holiday</option>
+</select>
+
+<label>Job Address (demo)</label>
+<input id="jobAddress" placeholder="123 Main St, Lansing, MI" />
+
+<div class="row">
+<div>
+<label>Estimated Work Time (minutes)</label>
+<input id="workMins" type="number" step="15" value="60" />
+</div>
+<div>
+<label>Simulated Round-Trip Drive Time (minutes)</label>
+<input id="driveMins" type="number" step="5" value="40" />
+<div class="muted">This will be replaced by Google Maps</div>
+</div>
+</div>
+
+<label>Service Call (Standard only)</label>
+<select id="serviceCall">
+  <option value="on">ON (includes first 30 min)</option>
+  <option value="off">OFF</option>
+</select>
+
+<label>Notes (optional)</label>
+<textarea id="notes" rows="3"></textarea>
+
+<div style="margin-top:12px;">
+<button onclick="calculate()">Calculate Quote</button>
+<button onclick="copyQuote()">Copy</button>
+<button onclick="window.print()">Print / Save as PDF</button>
+</div>
+</div>
+
+<div class="card">
+<div class="total" id="total">$0.00</div>
+<div class="breakdown" id="output">Enter values and calculate.</div>
+</div>
+
+</div>
+
+<script>
+const RATES = {
+  standard: { labor:195, travel:115, service:195 },
+  emergency: 292.5,
+  sunday: 390
+};
+
+const roundUp15 = m => Math.ceil(m / 15) * 15;
+
+let lastText = "";
+
+function calculate() {
+  const type = callType.value;
+  const work = Number(workMins.value);
+  const drive = Number(driveMins.value);
+  const address = jobAddress.value.trim();
+ let text = `Customer Address: ${address || "N/A"}\n\n`;
+text += `Call Type: ${type.toUpperCase()}\n\n`;
+  let total = 0;
+
+  if (type === "standard") {
+    if (serviceCall.value === "on") {
+      total += RATES.standard.service;
+      const extra = Math.max(0, work - 30);
+      const billed = roundUp15(extra);
+      const labor = billed / 60 * RATES.standard.labor;
+      total += labor;
+      text += `Service Call: $195.00 (includes 30 min)\n`;
+      if (labor > 0)
+        text += `Additional Labor: ${billed} min × $195/hr = $${labor.toFixed(2)}\n`;
+    } else {
+      const billed = roundUp15(work);
+      const labor = billed / 60 * RATES.standard.labor;
+      total += labor;
+      text += `Labor: ${billed} min × $195/hr = $${labor.toFixed(2)}\n`;
+    }
+
+    const travelBill = Math.max(0, drive - 30);
+    const travelBilled = roundUp15(travelBill);
+    const travelCost = travelBilled / 60 * RATES.standard.travel;
+    total += travelCost;
+    text += `Travel: ${travelBilled} min × $115/hr = $${travelCost.toFixed(2)}\n`;
+  }
+
+  if (type === "emergency" || type === "sunday") {
+    const rate = type === "emergency" ? RATES.emergency : RATES.sunday;
+    const totalMins = roundUp15(work + drive);
+    total = totalMins / 60 * rate;
+    text += `Total Time: ${totalMins} min × $${rate}/hr\n`;
+  }
+
+  text += `\nTOTAL: $${total.toFixed(2)}\n`;
+text += `\nDisclaimer: All times are estimates until service is complete. Final charges may vary. Parts and materials are additional.`;
+  if (notes.value) text += `\n\nNotes: ${notes.value}`;
+
+  document.getElementById("total").innerText = `$${total.toFixed(2)}`;
+  document.getElementById("output").innerText = text;
+  lastText = text;
+}
+
+function copyQuote() {
+  if (!lastText) return;
+  navigator.clipboard.writeText(lastText);
+}
+</script>
+
+</body>
+</html>
