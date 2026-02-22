@@ -112,21 +112,19 @@ text += `Call Type: ${type.toUpperCase()}\n\n`;
   let total = 0;
 
   if (type === "standard") {
-    if (serviceCall.value === "on") {
-      total += RATES.standard.service;
-      const extra = Math.max(0, work - 30);
-      const billed = roundUp15(extra);
-      const labor = billed / 60 * RATES.standard.labor;
-      total += labor;
-      text += `Service Call: $195.00 (includes 30 min)\n`;
-      if (labor > 0)
-        text += `Additional Labor: ${billed} min × $195/hr = $${labor.toFixed(2)}\n`;
-    } else {
-      const billed = roundUp15(work);
-      const labor = billed / 60 * RATES.standard.labor;
-      total += labor;
-      text += `Labor: ${billed} min × $195/hr = $${labor.toFixed(2)}\n`;
-    }
+    // Standard service call always applies
+total += RATES.standard.service;
+
+const extra = Math.max(0, work - 30);
+const billed = roundUp15(extra);
+const labor = (billed / 60) * RATES.standard.labor;
+
+total += labor;
+
+text += `Service Call: $195.00 (includes first 30 min)\n`;
+if (labor > 0) {
+  text += `Additional Labor: ${billed} min × $195/hr = $${labor.toFixed(2)}\n`;
+}
 
     const travelBill = Math.max(0, drive - 30);
     const travelBilled = roundUp15(travelBill);
