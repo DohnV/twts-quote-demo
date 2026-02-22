@@ -151,10 +151,18 @@ text += `\nDisclaimer: All times are estimates until service is complete. Final 
 }
 
 
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
 function copyQuote() {
   if (!lastText) return;
 
-  // Modern clipboard (works on many browsers)
+  if (isIOS()) {
+    fallbackCopy(lastText);
+    return;
+  }
+
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(lastText).catch(() => fallbackCopy(lastText));
   } else {
@@ -166,24 +174,30 @@ function fallbackCopy(text) {
   const ta = document.createElement("textarea");
   ta.value = text;
 
-  // Keep it off-screen but selectable
-  ta.style.position = "fixed";
-  ta.style.top = "-1000px";
-  ta.style.left = "-1000px";
   ta.setAttribute("readonly", "");
+  ta.style.position = "fixed";
+  ta.style.top = "0";
+  ta.style.left = "0";
+  ta.style.width = "1px";
+  ta.style.height = "1px";
+  ta.style.opacity = "0";
 
   document.body.appendChild(ta);
+
   ta.focus();
   ta.select();
+  ta.setSelectionRange(0, ta.value.length);
 
+  let ok = false;
   try {
-    document.execCommand("copy");
-  } catch (e) {
-    // If copy fails, at least show the text so they can manually copy
-    alert("Copy failed. Please press and hold to select text in the quote box.");
-  }
+    ok = document.execCommand("copy");
+  } catch (e) {}
 
-   document.body.removeChild(ta);
+  document.body.removeChild(ta);
+
+  if (!ok) {
+    alert("Copy didn’t work on this device. Tap and hold inside the quote box to select and copy.");
+  }
 }
 </script>
 
